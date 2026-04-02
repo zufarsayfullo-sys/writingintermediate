@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#080c14">
+<title>Writing Exam Platform · Upper-Intermediate</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#080c14; --surface:#0e1420; --card:#131a28;
+    --border:rgba(255,255,255,0.07);
+    --primary:#3b82f6; --primary-glow:rgba(59,130,246,0.25);
+    --accent:#06d6a0;  --accent-glow:rgba(6,214,160,0.2);
+    --warn:#f59e0b; --danger:#ef4444;
+    --text:#e2e8f0; --muted:#64748b;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{height:100%}
+  body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;padding-bottom:48px}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(59,130,246,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+  body::after{content:'';position:fixed;top:-30%;left:-20%;width:60%;height:60%;background:radial-gradient(ellipse,rgba(59,130,246,.06) 0%,transparent 70%);pointer-events:none;z-index:0}
+
+  .clue{position:fixed;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:rgba(100,116,139,.35);pointer-events:none;animation:floatClue 14s infinite ease-in-out;z-index:0;border:1px solid rgba(255,255,255,.04);padding:5px 12px;border-radius:20px;background:rgba(255,255,255,.02);white-space:nowrap}
+  @keyframes floatClue{0%,100%{transform:translate(0,0);opacity:.4}50%{transform:translate(8px,-18px);opacity:.7}}
+  @media(max-width:700px){.clue{display:none!important}}
+
+  header{z-index:10;text-align:center;padding:clamp(28px,6vw,48px) 20px clamp(12px,3vw,20px);width:100%}
+  header h1{font-size:clamp(1.25rem,5.5vw,1.9rem);font-weight:800;letter-spacing:-.03em;background:linear-gradient(135deg,#fff 30%,#06d6a0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  header p{color:var(--muted);font-size:clamp(.68rem,2.5vw,.78rem);margin-top:5px;font-weight:300;letter-spacing:.05em;text-transform:uppercase}
+
+  .screen{z-index:10;width:90%;max-width:780px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:clamp(20px,5vw,40px);margin-bottom:32px;box-shadow:0 40px 80px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06)}
+  .hidden{display:none!important}
+  .screen-title{font-size:clamp(1rem,4vw,1.3rem);font-weight:700;margin-bottom:6px}
+  .screen-sub{color:var(--muted);font-size:clamp(.8rem,3vw,.88rem);margin-bottom:22px}
+
+  .btn{border:none;border-radius:12px;padding:clamp(14px,3.5vw,16px) clamp(16px,4vw,22px);font-family:'Sora',sans-serif;font-weight:600;font-size:clamp(.9rem,3.5vw,1rem);cursor:pointer;transition:all .18s;min-height:54px;touch-action:manipulation;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  .btn-primary{background:var(--primary);color:#fff;width:100%;margin-top:8px;box-shadow:0 4px 20px var(--primary-glow)}
+  .btn-accent{background:var(--accent);color:#080c14;font-weight:700}
+  .btn-ghost{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--border)}
+  .btn-warn{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3)}
+  .btn:active{transform:scale(.96)}
+  @media(hover:hover){
+    .btn-primary:hover{background:#2563eb;transform:translateY(-1px)}
+    .btn-accent:hover{filter:brightness(1.1);transform:translateY(-1px)}
+    .btn-ghost:hover{background:rgba(255,255,255,.1)}
+    .q-card:hover{border-color:var(--accent);background:rgba(6,214,160,.06);transform:translateY(-2px);box-shadow:0 8px 24px var(--accent-glow)}
+  }
+
+  .q-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:20px}
+  @media(max-width:480px){.q-grid{grid-template-columns:1fr}}
+  .q-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 16px;cursor:pointer;transition:all .2s;touch-action:manipulation}
+  .q-card:active{transform:scale(.97)}
+  .q-card-num{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent);margin-bottom:8px;letter-spacing:.05em}
+  .q-card-text{font-size:clamp(.8rem,2.8vw,.88rem);font-weight:600;line-height:1.4;color:var(--text)}
+
+  .pairwork-screen{text-align:center}
+  .pw-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+  .pw-timer-wrap{text-align:center;margin:20px 0}
+  .pw-timer{font-family:'JetBrains Mono',monospace;font-size:clamp(3rem,14vw,5rem);font-weight:700;color:var(--warn);line-height:1;transition:color .3s}
+  .pw-timer.urgent{color:var(--danger);animation:blink .5s infinite}
+  .pw-timer.done{color:var(--accent)}
+  @keyframes blink{50%{opacity:.4}}
+  .pw-questions{display:flex;flex-direction:column;gap:10px;margin:20px 0;text-align:left}
+  .pw-q-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:clamp(.82rem,3vw,.9rem);line-height:1.5;display:flex;gap:12px;align-items:flex-start}
+  .pw-q-num{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent);flex-shrink:0;margin-top:2px;font-weight:600}
+  .pw-skip-note{font-size:.78rem;color:var(--muted);text-align:center;margin-top:12px}
+  .pw-btn-row{display:flex;gap:10px;margin-top:16px}
+  .pw-btn-row .btn{flex:1}
+
+  .exam-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:clamp(16px,4vw,24px);padding-bottom:clamp(14px,3.5vw,18px);border-bottom:1px solid var(--border)}
+  .exam-badge{font-family:'JetBrains Mono',monospace;font-size:clamp(.62rem,2.4vw,.72rem);padding:5px 12px;border-radius:20px;background:rgba(6,214,160,.08);border:1px solid rgba(6,214,160,.25);color:var(--accent);white-space:nowrap}
+  .exam-badge.timer-badge{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.35);color:var(--warn)}
+  .exam-badge.timer-urgent{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:var(--danger);animation:blink .6s infinite}
+
+  .topic-box{background:rgba(6,214,160,.05);border:1px solid rgba(6,214,160,.2);border-radius:14px;padding:clamp(14px,4vw,20px);margin-bottom:20px}
+  .topic-statement{font-size:clamp(1rem,4vw,1.25rem);font-weight:700;line-height:1.45;margin-bottom:14px;letter-spacing:-.01em}
+  .topic-instructions{list-style:none;padding:0}
+  .topic-instructions li{font-size:clamp(.78rem,2.8vw,.84rem);color:#93c5fd;line-height:1.5;padding:3px 0 3px 18px;position:relative}
+  .topic-instructions li::before{content:'—';position:absolute;left:0;color:var(--primary)}
+
+  .wc-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .wc-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted)}
+  .wc-count{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--accent);font-weight:600}
+  .wc-bar-wrap{height:4px;background:var(--border);border-radius:4px;margin-bottom:16px;overflow:hidden}
+  .wc-bar{height:100%;background:var(--accent);border-radius:4px;transition:width .3s,background .3s;width:0%}
+  .wc-bar.warn{background:var(--warn)}
+  .wc-bar.full{background:var(--accent)}
+
+  textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:clamp(14px,3.5vw,18px);color:var(--text);font-family:'Sora',sans-serif;font-size:clamp(.9rem,3vw,1rem);line-height:1.75;resize:vertical;min-height:clamp(220px,40vw,320px);outline:none;transition:border-color .2s;-webkit-appearance:none}
+  textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+  textarea::placeholder{color:var(--muted);font-style:italic}
+
+  .btn-row{display:flex;gap:10px;margin-top:14px}
+  .btn-row .btn{flex:1}
+  @media(max-width:360px){.btn-row{flex-direction:column}}
+
+  .loading-wrap{text-align:center;padding:clamp(30px,8vw,50px) 0}
+  .spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-text{color:var(--muted);font-size:.88rem;font-family:'JetBrains Mono',monospace}
+  .loading-step{color:var(--accent);font-size:.75rem;margin-top:8px;font-family:'JetBrains Mono',monospace}
+
+  .result-hero{text-align:center;margin-bottom:clamp(22px,5vw,32px)}
+  .result-circle{width:clamp(100px,26vw,124px);height:clamp(100px,26vw,124px);border-radius:50%;margin:0 auto 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid var(--accent);box-shadow:0 0 40px var(--accent-glow);background:rgba(6,214,160,.05)}
+  .result-score{font-family:'JetBrains Mono',monospace;font-size:clamp(2rem,8vw,2.6rem);font-weight:600;color:var(--accent);line-height:1}
+  .result-max{font-size:.68rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+  .result-topic{font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;max-width:500px;margin:0 auto;line-height:1.4}
+
+  .criteria-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(6px,2vw,10px);margin-bottom:clamp(20px,5vw,28px)}
+  @media(max-width:500px){.criteria-grid{grid-template-columns:repeat(3,1fr)}}
+  .crit-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:clamp(10px,2.5vw,14px) 8px;text-align:center}
+  .crit-score{font-family:'JetBrains Mono',monospace;font-size:clamp(1rem,4vw,1.3rem);font-weight:600;margin-bottom:4px}
+  .crit-label{font-size:clamp(.56rem,1.8vw,.66rem);color:var(--muted);text-transform:uppercase;letter-spacing:.04em;line-height:1.3}
+
+  .feedback-section{margin-bottom:16px}
+  .fb-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  .fb-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:clamp(13px,3.5vw,16px);font-size:clamp(.82rem,2.8vw,.88rem);line-height:1.7;color:var(--text);white-space:pre-wrap;word-break:break-word}
+  .fb-box.task{border-left:3px solid #93c5fd}
+  .fb-box.grammar{border-left:3px solid #6ee7b7}
+  .fb-box.vocab{border-left:3px solid #fcd34d}
+  .fb-box.org{border-left:3px solid #c4b5fd}
+  .fb-box.overall{border-left:3px solid var(--accent);background:rgba(6,214,160,.04)}
+
+  .essay-preview{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:clamp(13px,3.5vw,16px);font-size:clamp(.8rem,2.6vw,.85rem);line-height:1.7;color:rgba(226,232,240,.7);margin-bottom:20px;font-style:italic;white-space:pre-wrap;word-break:break-word;max-height:160px;overflow-y:auto}
+
+  .divider{height:1px;background:var(--border);margin:20px 0}
+  .retry-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;margin-top:20px;text-decoration:underline;font-family:'Sora',sans-serif;display:block;text-align:center;width:100%;padding:12px;min-height:44px}
+  .retry-btn:hover{color:var(--text)}
+  .error-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:13px 15px;font-size:.83rem;color:#fca5a5;margin-bottom:14px;display:none}
+  .ai-detected-screen{text-align:center;padding:20px 0}
+  .ai-icon{font-size:3.5rem;margin-bottom:16px}
+  .ai-title{font-size:clamp(1.1rem,4vw,1.4rem);font-weight:800;color:var(--danger);margin-bottom:10px}
+  .ai-msg{font-size:clamp(.82rem,3vw,.9rem);color:var(--muted);line-height:1.7;margin-bottom:24px;max-width:480px;margin-left:auto;margin-right:auto}
+  .ai-detail{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:14px 16px;font-size:.82rem;color:#fca5a5;line-height:1.6;margin-bottom:20px;text-align:left}
+  .s-blue{color:#93c5fd} .s-green{color:#6ee7b7} .s-yellow{color:#fcd34d} .s-purple{color:#c4b5fd} .s-pink{color:#f9a8d4}
+</style>
+</head>
+<body>
+
+<div class="clue" style="top:10%;left:4%;animation-delay:0s">"Furthermore..."</div>
+<div class="clue" style="top:7%;right:6%;animation-delay:2s">"In my opinion"</div>
+<div class="clue" style="bottom:22%;left:3%;animation-delay:4s">"To conclude..."</div>
+<div class="clue" style="bottom:10%;right:4%;animation-delay:6s">"For instance..."</div>
+<div class="clue" style="top:42%;left:1%;animation-delay:1s">"However..."</div>
+<div class="clue" style="top:60%;right:2%;animation-delay:3s">"Therefore..."</div>
+
+<header>
+  <h1>Writing Exam Platform</h1>
+  <p>Upper-Intermediate · AI-Scored Essay Practice</p>
+</header>
+
+<!-- SCREEN 1: Question selection -->
+<div class="screen" id="menu-screen">
+  <div class="screen-title">Select Your Essay Question</div>
+  <div class="screen-sub">Choose the topic assigned to you or practice any question</div>
+  <div class="q-grid" id="q-grid"></div>
+</div>
+
+<!-- SCREEN 2: Pair work (optional discussion) -->
+<div class="screen hidden" id="pairwork-screen">
+  <div class="pw-header">
+    <div>
+      <div class="screen-title" style="margin-bottom:2px">💬 Pair Discussion</div>
+      <div style="font-size:.8rem;color:var(--muted)">Discuss these questions with your partner before writing</div>
+    </div>
+    <div class="exam-badge" id="pw-q-badge">Question 1</div>
+  </div>
+
+  <div class="pw-timer-wrap">
+    <div class="pw-timer" id="pw-timer">3:00</div>
+    <div class="pw-timer-label">discussion time remaining</div>
+  </div>
+
+  <div class="pw-questions" id="pw-questions"></div>
+
+  <div class="pw-skip-note">This is optional — you can skip directly to writing</div>
+  <div class="pw-btn-row">
+    <button class="btn btn-ghost" onclick="skipPairWork()">Skip to Writing →</button>
+    <button class="btn btn-warn" id="pw-start-btn" onclick="startPairTimer()">▶ Start Timer</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: Writing -->
+<div class="screen hidden" id="exam-screen">
+  <div class="exam-header">
+    <div class="exam-badge" id="q-badge">Question 1</div>
+    <div class="exam-badge timer-badge" id="essay-timer-badge">12:00</div>
+    <div class="exam-badge" id="wc-badge-top">0 words</div>
+  </div>
+
+  <div class="topic-box">
+    <div class="topic-statement" id="topic-statement">—</div>
+    <div class="field-label" style="margin-bottom:10px;font-size:.72rem;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;">In your essay, you should:</div>
+    <ul class="topic-instructions" id="topic-instructions"></ul>
+  </div>
+
+  <div class="wc-row">
+    <span class="wc-label">Word count</span>
+    <span class="wc-count" id="wc-display">0 / 100 minimum</span>
+  </div>
+  <div class="wc-bar-wrap"><div class="wc-bar" id="wc-bar"></div></div>
+
+  <div class="field-group">
+    <textarea id="essay-input" placeholder="Start writing your essay here…" oninput="updateWordCount()"></textarea>
+  </div>
+
+  <div class="error-box" id="essay-error"></div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goBack()">← Back</button>
+    <button class="btn btn-accent" onclick="submitEssay()">Submit Essay ✓</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: Loading -->
+<div class="screen hidden" id="loading-screen">
+  <div class="loading-wrap">
+    <div class="spinner"></div>
+    <div class="loading-text">Marking your essay…</div>
+    <div class="loading-step" id="loading-step">Sending to AI examiner</div>
+  </div>
+</div>
+
+<!-- SCREEN 4b: AI Detected -->
+<div class="screen hidden" id="ai-screen">
+  <div class="ai-detected-screen">
+    <div class="ai-icon">🤖</div>
+    <div class="ai-title">AI-Generated Essay Detected</div>
+    <div class="ai-msg">Your essay cannot be marked because it appears to have been written by AI or copied from an AI tool. The exam requires your own original writing.</div>
+    <div class="ai-detail" id="ai-detail"></div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:4px" onclick="goBackFromAI()">← Write Your Own Essay</button>
+  </div>
+</div>
+
+<!-- SCREEN 5: Results -->
+<div class="screen hidden" id="result-screen">
+  <div class="result-hero">
+    <div class="result-circle">
+      <div class="result-score" id="result-total">—</div>
+      <div class="result-max">/ 15</div>
+    </div>
+    <div class="result-topic" id="result-topic"></div>
+  </div>
+
+  <div class="criteria-grid">
+    <div class="crit-item"><div class="crit-score s-blue"   id="cr-task">—</div><div class="crit-label">Task<br>Achievement</div></div>
+    <div class="crit-item"><div class="crit-score s-green"  id="cr-grammar">—</div><div class="crit-label">Grammar</div></div>
+    <div class="crit-item"><div class="crit-score s-yellow" id="cr-vocab">—</div><div class="crit-label">Vocabulary</div></div>
+    <div class="crit-item"><div class="crit-score s-purple" id="cr-org">—</div><div class="crit-label">Organization</div></div>
+    <div class="crit-item"><div class="crit-score s-pink"   id="cr-wc">—</div><div class="crit-label">Word<br>Count</div></div>
+  </div>
+
+  <div class="feedback-section">
+    <div class="fb-title" style="color:#93c5fd">📝 Task Achievement</div>
+    <div class="fb-box task" id="fb-task"></div>
+  </div>
+  <div class="feedback-section">
+    <div class="fb-title" style="color:#6ee7b7">📐 Grammar</div>
+    <div class="fb-box grammar" id="fb-grammar"></div>
+  </div>
+  <div class="feedback-section">
+    <div class="fb-title" style="color:#fcd34d">📚 Vocabulary</div>
+    <div class="fb-box vocab" id="fb-vocab"></div>
+  </div>
+  <div class="feedback-section">
+    <div class="fb-title" style="color:#c4b5fd">🗂 Organization</div>
+    <div class="fb-box org" id="fb-org"></div>
+  </div>
+  <div class="divider"></div>
+  <div class="feedback-section">
+    <div class="fb-title" style="color:var(--accent)">💡 Overall Recommendation</div>
+    <div class="fb-box overall" id="fb-overall"></div>
+  </div>
+  <div class="feedback-section">
+    <div class="fb-title" style="color:var(--muted)">Your Essay</div>
+    <div class="essay-preview" id="essay-preview"></div>
+  </div>
+  <button class="retry-btn" onclick="location.reload()">Take another test</button>
+</div>
+
+<script>
+const DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions";
+const DEEPSEEK_KEY = "sk-527571fb922941168935f8a3d939876f";
+
+// ==================== NEW ESSAY QUESTIONS ====================
+const questions = [
+  { 
+    id: 1, 
+    statement: "Teamwork is an essential skill for success.",
+    instructions: [
+      "explain why teamwork is important",
+      "give detailed reasons that can support your opinion",
+      "give an example and/or a suggestion and/or a recommendation on improving teamwork skills"
+    ],
+    pairwork: [
+      "Do you prefer working alone or in a team? Why?",
+      "What happens when one person does all the work in a team?",
+      "How can a team resolve conflicts effectively?",
+      "What skills make someone a good team player?"
+    ]
+  },
+  { 
+    id: 2, 
+    statement: "Regular exercise is essential for a healthy lifestyle.",
+    instructions: [
+      "write why regular exercise is essential for a healthy lifestyle",
+      "give detailed reasons that can support your opinion",
+      "give an example and/or a suggestion and/or a recommendation for incorporating exercise into daily life"
+    ],
+    pairwork: [
+      "How many times a week do you exercise? Is it enough?",
+      "What stops people from exercising regularly?",
+      "What is the best time of day to exercise? Why?",
+      "Do you prefer exercising alone or with others? Why?"
+    ]
+  },
+  { 
+    id: 3, 
+    statement: "Some films and video games should be educational.",
+    instructions: [
+      "explain why films and/or video games should be educational",
+      "give detailed reasons that can support your opinion",
+      "give an example and/or a suggestion and/or a recommendation on making films and/or video games educational"
+    ],
+    pairwork: [
+      "What educational video games have you played? Were they fun?",
+      "Can you learn more from a game or from a textbook? Why?",
+      "What historical movie taught you something new?",
+      "Should schools use educational games in class?"
+    ]
+  },
+  { 
+    id: 4, 
+    statement: "Reading books regularly is important for personal development.",
+    instructions: [
+      "write why reading is important for personal growth",
+      "give detailed reasons that can support your opinion",
+      "give an example and/or a suggestion and/or a recommendation for making reading a habit"
+    ],
+    pairwork: [
+      "How many books did you read last year?",
+      "Do you prefer physical books or e-books? Why?",
+      "What is the last book that changed how you think?",
+      "How can parents encourage children to read more?"
+    ]
+  },
+  { 
+    id: 5, 
+    statement: "The English language is a key factor to become a successful person.",
+    instructions: [
+      "write why the English language is important to be successful",
+      "give detailed reasons that can support your opinion",
+      "give an example and/or a suggestion and/or a recommendation for young people"
+    ],
+    pairwork: [
+      "How has English helped you in your life so far?",
+      "Do you think English will still be important in 20 years?",
+      "What is the hardest part of learning English for you?",
+      "What advice would you give to someone starting to learn English?"
+    ]
+  },
+  { 
+    id: 6, 
+    statement: "Technology is changing our lives.",
+    instructions: [
+      "explain how technology affects daily life",
+      "give detailed reasons that can support your opinion",
+      "give an example and/or a suggestion and/or a recommendation for using technology effectively"
+    ],
+    pairwork: [
+      "What technology could you not live without? Why?",
+      "Has technology made people more connected or more isolated?",
+      "What is the most useful invention of the last 10 years?",
+      "What are the negative effects of too much screen time?"
+    ]
+  }
+];
+
+// ==================== STATE ====================
+let currentQ = null;
+let typedChars = 0, pastedChars = 0;
+let pwTimerInterval = null, pwSecondsLeft = 180;
+let essayTimerInterval = null, essaySecondsLeft = 720;
+
+// ==================== HELPERS ====================
+function countWords(text) {
+  return text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+}
+function fmt(s) {
+  const m = Math.floor(s / 60), sec = s % 60;
+  return `${m}:${sec.toString().padStart(2,'0')}`;
+}
+
+// ==================== MENU SCREEN ====================
+(function initMenu() {
+  const grid = document.getElementById('q-grid');
+  grid.innerHTML = '';
+  questions.forEach(q => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.innerHTML = `<div class="q-card-num">QUESTION ${q.id}</div><div class="q-card-text">${q.statement}</div>`;
+    card.onclick = () => goToPairWork(q);
+    grid.appendChild(card);
+  });
+})();
+
+// ==================== PAIR WORK SCREEN ====================
+function goToPairWork(q) {
+  currentQ = q;
+  document.getElementById('menu-screen').classList.add('hidden');
+  document.getElementById('pw-q-badge').textContent = `Question ${q.id}`;
+
+  const container = document.getElementById('pw-questions');
+  container.innerHTML = '';
+  q.pairwork.forEach((pq, i) => {
+    const el = document.createElement('div');
+    el.className = 'pw-q-item';
+    el.innerHTML = `<div class="pw-q-num">Q${i+1}</div><div>${pq}</div>`;
+    container.appendChild(el);
+  });
+
+  clearInterval(pwTimerInterval); pwTimerInterval = null;
+  pwSecondsLeft = 180;
+  document.getElementById('pw-timer').textContent = fmt(pwSecondsLeft);
+  document.getElementById('pw-timer').className = 'pw-timer';
+  document.getElementById('pw-start-btn').disabled = false;
+  document.getElementById('pw-start-btn').textContent = '▶ Start Timer';
+
+  document.getElementById('pairwork-screen').classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function startPairTimer() {
+  if (pwTimerInterval) return;
+  document.getElementById('pw-start-btn').disabled = true;
+  document.getElementById('pw-start-btn').textContent = '⏱ Running…';
+  pwTimerInterval = setInterval(() => {
+    pwSecondsLeft--;
+    const el = document.getElementById('pw-timer');
+    el.textContent = fmt(pwSecondsLeft);
+    if (pwSecondsLeft <= 30) el.className = 'pw-timer urgent';
+    if (pwSecondsLeft <= 0) {
+      clearInterval(pwTimerInterval); pwTimerInterval = null;
+      el.textContent = '0:00'; el.className = 'pw-timer done';
+      document.getElementById('pw-start-btn').textContent = '✓ Time Up';
+      setTimeout(() => startWriting(), 1200);
+    }
+  }, 1000);
+}
+
+function skipPairWork() {
+  clearInterval(pwTimerInterval); pwTimerInterval = null;
+  startWriting();
+}
+
+// ==================== WRITING SCREEN ====================
+function startWriting() {
+  document.getElementById('pairwork-screen').classList.add('hidden');
+  document.getElementById('q-badge').textContent = `Question ${currentQ.id}`;
+  document.getElementById('topic-statement').textContent = currentQ.statement;
+
+  const ul = document.getElementById('topic-instructions');
+  ul.innerHTML = '';
+  currentQ.instructions.forEach(inst => {
+    const li = document.createElement('li'); 
+    li.textContent = inst; 
+    ul.appendChild(li);
+  });
+
+  document.getElementById('essay-input').value = '';
+  typedChars = 0; pastedChars = 0;
+  updateWordCount();
+  document.getElementById('essay-error').style.display = 'none';
+
+  clearInterval(essayTimerInterval);
+  essaySecondsLeft = 720;
+  const badge = document.getElementById('essay-timer-badge');
+  badge.textContent = fmt(essaySecondsLeft);
+  badge.className = 'exam-badge timer-badge';
+
+  essayTimerInterval = setInterval(() => {
+    essaySecondsLeft--;
+    badge.textContent = fmt(essaySecondsLeft);
+    if (essaySecondsLeft <= 60) badge.className = 'exam-badge timer-urgent';
+    else if (essaySecondsLeft <= 180) badge.className = 'exam-badge timer-badge';
+    if (essaySecondsLeft <= 0) {
+      clearInterval(essayTimerInterval);
+      badge.textContent = 'Time Up!';
+      submitEssay();
+    }
+  }, 1000);
+
+  document.getElementById('exam-screen').classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function goBack() {
+  clearInterval(essayTimerInterval); essayTimerInterval = null;
+  document.getElementById('exam-screen').classList.add('hidden');
+  document.getElementById('menu-screen').classList.remove('hidden');
+}
+
+function updateWordCount() {
+  const text = document.getElementById('essay-input').value;
+  const wc = countWords(text);
+  const pct = Math.min(wc / 100 * 100, 100);
+  document.getElementById('wc-display').textContent = `${wc} / 100 minimum`;
+  document.getElementById('wc-badge-top').textContent = `${wc} words`;
+  const bar = document.getElementById('wc-bar');
+  bar.style.width = pct + '%';
+  bar.className = 'wc-bar' + (wc >= 100 ? ' full' : wc >= 60 ? ' warn' : '');
+}
+
+// ==================== PASTE & TYPING TRACKING ====================
+document.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('essay-input');
+  ta.addEventListener('keypress', () => { typedChars++; });
+  ta.addEventListener('paste', e => {
+    setTimeout(() => {
+      const pasted = e.clipboardData ? e.clipboardData.getData('text').length : 200;
+      pastedChars += pasted;
+    }, 10);
+  });
+});
+
+function isPasteSuspicious(essay) {
+  const total = typedChars + pastedChars;
+  if (total === 0) return false;
+  return pastedChars > 0 && (pastedChars / Math.max(essay.length, 1)) > 0.55;
+}
+
+function goBackFromAI() {
+  document.getElementById('ai-screen').classList.add('hidden');
+  document.getElementById('exam-screen').classList.remove('hidden');
+  document.getElementById('essay-input').value = '';
+  typedChars = 0; pastedChars = 0;
+  updateWordCount();
+}
+
+// ==================== SUBMIT ====================
+async function submitEssay() {
+  const essay = document.getElementById('essay-input').value.trim();
+  const wc = countWords(essay);
+  const err = document.getElementById('essay-error');
+  if (!essay) { err.style.display='block'; err.textContent='Please write your essay before submitting.'; return; }
+  if (wc < 20) { err.style.display='block'; err.textContent=`Essay too short (${wc} words). Please write more.`; return; }
+  err.style.display = 'none';
+  clearInterval(essayTimerInterval); essayTimerInterval = null;
+  document.getElementById('exam-screen').classList.add('hidden');
+  document.getElementById('loading-screen').classList.remove('hidden');
+
+  if (isPasteSuspicious(essay)) {
+    showAIDetected("⚠️ Large paste detected: most of this essay was pasted rather than typed. Please write your own essay without copying from AI tools.");
+    return;
+  }
+
+  try {
+    document.getElementById('loading-step').textContent = 'Checking originality…';
+    const aiCheck = await detectAI(essay);
+    if (aiCheck.isAI) {
+      showAIDetected(aiCheck.reason);
+      return;
+    }
+    document.getElementById('loading-step').textContent = 'Sending to AI examiner…';
+    const result = await scoreEssay(currentQ, essay, wc);
+    showResults(result, essay);
+  } catch(e) {
+    document.getElementById('loading-step').textContent = '❌ ' + e.message;
+    const retryBtn = document.createElement('button');
+    retryBtn.className = 'btn btn-ghost';
+    retryBtn.style.cssText = 'margin-top:20px;width:auto;padding:12px 24px';
+    retryBtn.textContent = '↩ Go back & try again';
+    retryBtn.onclick = () => {
+      retryBtn.remove();
+      document.getElementById('loading-screen').classList.add('hidden');
+      document.getElementById('exam-screen').classList.remove('hidden');
+    };
+    document.querySelector('.loading-wrap').appendChild(retryBtn);
+  }
+}
+
+function showAIDetected(reason) {
+  document.getElementById('loading-screen').classList.add('hidden');
+  document.getElementById('ai-detail').textContent = reason;
+  document.getElementById('ai-screen').classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ==================== AI DETECTION ====================
+async function detectAI(essay) {
+  const prompt = `You are an academic integrity checker. Analyse this student essay and determine if it was written by an AI (ChatGPT, DeepSeek, Gemini, etc.) or copy-pasted from an AI tool.
+
+ESSAY: "${essay}"
+
+Signs of AI writing: perfect grammar, formal vocabulary beyond upper-intermediate level, flawless organization, no personal voice or mistakes, overly balanced arguments, generic examples, polished transitions.
+
+Signs of genuine student writing: grammar mistakes, simple vocabulary, personal examples, informal phrases, natural imperfections, hesitations in argument.
+
+Reply ONLY in this exact JSON (no markdown):
+{"isAI": true or false, "confidence": "high/medium/low", "reason": "One clear sentence explaining your decision with specific evidence from the essay."}`;
+
+  const res = await fetch(DEEPSEEK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + DEEPSEEK_KEY },
+    body: JSON.stringify({ model: 'deepseek-chat', max_tokens: 200, temperature: 0.1, messages: [{ role: 'user', content: prompt }] })
+  });
+  if (!res.ok) throw new Error(`Detection error ${res.status}`);
+  const data = await res.json();
+  let text = data.choices[0].message.content.trim().replace(/```json|```/g,'').trim();
+  const m = text.match(/\{[\s\S]*\}/);
+  if (!m) return { isAI: false, reason: '' };
+  const p = JSON.parse(m[0]);
+  return { isAI: p.isAI === true && p.confidence === 'high', reason: p.reason || '' };
+}
+
+// ==================== SCORING ====================
+async function scoreEssay(q, essay, wc) {
+  const prompt = `You are a supportive English examiner marking an upper-intermediate student essay. Be GENEROUS and ENCOURAGING — reward effort and communication, not perfection.
+
+TOPIC: "${q.statement}"
+STUDENT ESSAY (${wc} words): "${essay}"
+
+Score each criterion 0–3. Default to 3 unless there is a CLEAR, SPECIFIC reason to go lower:
+
+1. TASK ACHIEVEMENT /3
+   3 = Student addresses the topic and gives a position (even if simple or brief)
+   2 = Position is present but vague, or reasons are very thin
+   1 = Barely addresses the topic
+   0 = Completely off-topic
+
+2. GRAMMAR /3
+   3 = Communicates clearly; occasional errors are fine and expected
+   2 = Errors are frequent but meaning is still understandable
+   1 = Errors make comprehension difficult
+   0 = Incomprehensible
+
+3. VOCABULARY /3
+   3 = Uses a reasonable range of words for the topic; some errors are fine
+   2 = Limited vocabulary but adequate for basic communication
+   1 = Very limited; mostly basic words with many errors
+   0 = Almost no relevant vocabulary
+
+4. ORGANIZATION /3
+   3 = Has some structure (intro, body, conclusion — even rough); uses some linking words
+   2 = Some organization visible but inconsistent
+   1 = Very little structure
+   0 = No organization at all
+
+5. WORD COUNT /3
+   3 = 70+ words
+   2 = 50-69 words
+   1 = 20-49 words
+   0 = Under 20 words
+   (this essay: ${wc} words — apply this mechanically)
+
+IMPORTANT GRADING PHILOSOPHY:
+- Upper-intermediate students WILL make grammar mistakes — that is normal and expected
+- A student who communicates their opinion clearly with some errors deserves 2–3, not 0–1
+- Only give 0 or 1 when communication genuinely breaks down
+- Be specific in feedback: quote the student's actual words, praise what works, then suggest one or two improvements
+- For grammar feedback, use format: "wrong phrase" → "better version"
+- Keep feedback encouraging and constructive
+
+Reply ONLY in this exact JSON (no markdown):
+{"task":0,"grammar":0,"vocab":0,"org":0,"wc":0,"fb_task":"...","fb_grammar":"...","fb_vocab":"...","fb_org":"...","fb_overall":"..."}`;
+
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      document.getElementById('loading-step').textContent =
+        attempt === 1 ? 'Sending to AI examiner…' : `Retrying (attempt ${attempt}/3)…`;
+
+      const res = await fetch(DEEPSEEK_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + DEEPSEEK_KEY
+        },
+        body: JSON.stringify({
+          model: "deepseek-chat",
+          max_tokens: 1000,
+          temperature: 0.1,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+
+      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      if (!data.choices || !data.choices[0]) throw new Error('Unexpected response format');
+
+      let text = data.choices[0].message.content.trim().replace(/```json|```/g,'').trim();
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('Could not parse AI response');
+      const p = JSON.parse(jsonMatch[0]);
+
+      return {
+        task:    Math.min(3, Math.max(0, Number(p.task)    || 0)),
+        grammar: Math.min(3, Math.max(0, Number(p.grammar) || 0)),
+        vocab:   Math.min(3, Math.max(0, Number(p.vocab)   || 0)),
+        org:     Math.min(3, Math.max(0, Number(p.org)     || 0)),
+        wc:      Math.min(3, Math.max(0, Number(p.wc)      || 0)),
+        fb_task:    p.fb_task    || '',
+        fb_grammar: p.fb_grammar || '',
+        fb_vocab:   p.fb_vocab   || '',
+        fb_org:     p.fb_org     || '',
+        fb_overall: p.fb_overall || ''
+      };
+    } catch(e) {
+      lastError = e;
+      if (attempt < 3) await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+  throw new Error(lastError.message || 'Failed to connect. Check your internet and try again.');
+}
+
+// ==================== RESULTS ====================
+function showResults(r, essay) {
+  const total = r.task + r.grammar + r.vocab + r.org + r.wc;
+  const color = total >= 12 ? '#06d6a0' : total >= 8 ? '#f59e0b' : '#ef4444';
+  document.getElementById('loading-screen').classList.add('hidden');
+  document.getElementById('result-screen').classList.remove('hidden');
+  document.getElementById('result-total').textContent = total;
+  document.getElementById('result-total').style.color = color;
+  document.getElementById('result-topic').textContent = currentQ.statement;
+  document.getElementById('cr-task').textContent    = `${r.task}/3`;
+  document.getElementById('cr-grammar').textContent = `${r.grammar}/3`;
+  document.getElementById('cr-vocab').textContent   = `${r.vocab}/3`;
+  document.getElementById('cr-org').textContent     = `${r.org}/3`;
+  document.getElementById('cr-wc').textContent      = `${r.wc}/3`;
+  document.getElementById('fb-task').textContent    = r.fb_task;
+  document.getElementById('fb-grammar').textContent = r.fb_grammar;
+  document.getElementById('fb-vocab').textContent   = r.fb_vocab;
+  document.getElementById('fb-org').textContent     = r.fb_org;
+  document.getElementById('fb-overall').textContent = r.fb_overall;
+  document.getElementById('essay-preview').textContent = essay;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
